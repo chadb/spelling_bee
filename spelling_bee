@@ -1,0 +1,80 @@
+#! /usr/bin/env ruby -w
+#
+# (c) Chad Bearden 2018
+#
+# Solves the New York Times Magazine Spelling Bee Puzzle.
+#
+# BUGS
+#
+#   Some words in the dictionary are not words that I can look up in the Merriam
+#   Webster Dictionary like 'topia'
+#
+#   /usr/share/dict/words removes hyphens from words like tip-top.  Tip-top is
+#   listed as tiptop.
+#
+# ISSUES
+#
+#   Not very OOP 
+#
+if ARGV.first.nil?
+  puts "Solve the New York Times Magazine Spelling Bee puzzle!"
+  puts "USAGE: spelling_bee letters_to_check_where_first_letter_is_required_in_all_words"
+  puts "       Finds all words with more than 5 letters containing the letters oahimpt and requiring the letter 'o'. Proper names and hyphenated words are not allowed. 1 point for each answer and 3 points for a word that uses all letters"
+  puts "EXAMPLE: ./spelling_bee oahimpt"
+  puts "BUGS: The dictionary used removes hyphens from words like tip-top.  They are listed as tiptop which is not a word."
+  exit 1
+end
+allowed_letters = ARGV.first.split(//).uniq
+
+puts "Allowed Letters: #{allowed_letters.join(' ')}"
+# No capital letters as these imply proper names
+forbidden = %w(A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h i j k l m n o p q r s t u v w x y z) - allowed_letters
+required = allowed_letters.shift
+min_length = 5
+puts "Required Letter: #{required}"
+
+# read dictionary
+
+dict = IO.readlines '/usr/share/dict/words'
+puts "Checking #{dict.length} words"
+
+not_long_enough_words = []
+required_letter_missing_words =[]
+forbidden_letter_words = []
+spelling_bee = []
+
+while( candidate = dict.shift )
+  candidate.chomp!
+  if candidate.length < min_length
+    not_long_enough_words << candidate
+  else
+    unless candidate.include? required
+      required_letter_missing_words << candidate
+    else
+      if forbidden.any?{|let| candidate.include? let}
+        forbidden_letter_words << candidate
+      else
+        spelling_bee << candidate
+      end
+    end
+  end
+end
+
+# Stats
+puts "Words with < #{min_length} characters #{not_long_enough_words.length}"
+puts "Words without an '#{required}' #{required_letter_missing_words.length}"
+puts "Words with forbidden letters '#{forbidden.join}' #{forbidden_letter_words.length}"
+puts "Spelling Bee has #{spelling_bee.length} words"
+
+# Show words and score
+score = 0
+spelling_bee.each do |word|
+  if word.split(//).sort.uniq == (allowed_letters + [required]).sort
+    puts "  3 #{word} **"
+    score +=3
+  else
+    puts "  1 #{word}"
+    score +=1
+  end
+end
+printf "------------------\n%3i Total\n", score
