@@ -16,6 +16,7 @@
 #
 #   Not very OOP 
 #
+word_list = '/usr/share/dict/words'
 if ARGV.first.nil?
   puts "Solve the New York Times Magazine Spelling Bee puzzle!"
   puts "USAGE: spelling_bee letters_to_check_where_first_letter_is_required_in_all_words"
@@ -30,12 +31,12 @@ puts "Allowed Letters: #{allowed_letters.join(' ')}"
 # No capital letters as these imply proper names
 forbidden = %w(A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h i j k l m n o p q r s t u v w x y z) - allowed_letters
 required = allowed_letters.shift
-min_length = 5
+min_length = 4
 puts "Required Letter: #{required}"
 
 # read dictionary
 
-dict = IO.readlines '/usr/share/dict/words'
+dict = IO.readlines word_list
 puts "Checking #{dict.length} words"
 
 not_long_enough_words = []
@@ -70,11 +71,17 @@ puts "Spelling Bee has #{spelling_bee.length} words"
 score = 0
 spelling_bee.each do |word|
   if word.split(//).sort.uniq == (allowed_letters + [required]).sort
-    puts "  3 #{word} **"
-    score +=3
+    puts " 15 #{word} ** Panagram **"
+    score += 15
   else
-    puts "  1 #{word}"
-    score +=1
+    word_score = word.length
+    if word_score == 4
+      puts "  1 #{word}"
+      score += 1
+    else
+      score += word_score
+      puts "  #{word_score} #{word}"
+    end
   end
 end
 printf "------------------\n%3i Total\n", score
