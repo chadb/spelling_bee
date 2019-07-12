@@ -16,7 +16,14 @@
 #
 #   Not very OOP 
 #
-word_list = '/usr/share/dict/words'
+
+# Choose your word list
+
+#word_list = './words_alpha.txt'
+#word_list = 'google-10000-english-usa.txt'
+#word_list = './words'
+word_list = './popular.txt'
+
 if ARGV.first.nil?
   puts "Solve the New York Times Magazine Spelling Bee puzzle!"
   puts "USAGE: spelling_bee letters_to_check_where_first_letter_is_required_in_all_words"
@@ -62,6 +69,7 @@ while( candidate = dict.shift )
 end
 
 # Stats
+puts "Using the master word list:  #{word_list} "
 puts "Words with < #{min_length} characters #{not_long_enough_words.length}"
 puts "Words without an '#{required}' #{required_letter_missing_words.length}"
 puts "Words with forbidden letters '#{forbidden.join}' #{forbidden_letter_words.length}"
