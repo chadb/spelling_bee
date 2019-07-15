@@ -17,8 +17,7 @@
 #   Not very OOP 
 #
 
-# Choose your word list
-
+# By default we will check oll the files in the dictionaries directory 
 dicts = Dir.glob("./dictionaries/*")
 
 if ARGV.first.nil?
@@ -48,11 +47,12 @@ dicts = ARGV[1..-1] unless ARGV[1].nil?
 dicts.each do |word_list|
   puts "Using the dictionary:  #{word_list} "
   dict = IO.readlines word_list
-  puts "Checking #{dict.length} words"
+  puts "Checking about #{dict.length} words"
 
 
   while( candidate = dict.shift )
     candidate.chomp!
+    next if candidate=~/\W/  # fuck off words with non-alpha chars
     if candidate.length < min_length
       not_long_enough_words << candidate
     else
