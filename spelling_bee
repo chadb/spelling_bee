@@ -19,14 +19,11 @@
 
 # Choose your word list
 
-#word_list = './words_alpha.txt'
-#word_list = 'google-10000-english-usa.txt'
-#word_list = './words'
-word_list = './popular.txt'
+dicts = Dir.glob("./dictionaries/*")
 
 if ARGV.first.nil?
   puts "Solve the New York Times Magazine Spelling Bee puzzle!"
-  puts "USAGE: spelling_bee letters_to_check_where_first_letter_is_required_in_all_words"
+  puts "USAGE: spelling_bee letters_to_check_where_first_letter_is_required_in_all_words [dictionary]"
   puts "       Finds all words with more than 5 letters containing the letters oahimpt and requiring the letter 'o'. Proper names and hyphenated words are not allowed. 1 point for each answer and 3 points for a word that uses all letters"
   puts "EXAMPLE: ./spelling_bee oahimpt"
   puts "BUGS: The dictionary used removes hyphens from words like tip-top.  They are listed as tiptop which is not a word."
@@ -41,43 +38,45 @@ required = allowed_letters.shift
 min_length = 4
 puts "Required Letter: #{required}"
 
+  not_long_enough_words = []
+  required_letter_missing_words =[]
+  forbidden_letter_words = []
+  spelling_bee = []
+
 # read dictionary
+dicts = ARGV[1..-1] unless ARGV[1].nil?
+dicts.each do |word_list|
+  puts "Using the dictionary:  #{word_list} "
+  dict = IO.readlines word_list
+  puts "Checking #{dict.length} words"
 
-dict = IO.readlines word_list
-puts "Checking #{dict.length} words"
 
-not_long_enough_words = []
-required_letter_missing_words =[]
-forbidden_letter_words = []
-spelling_bee = []
-
-while( candidate = dict.shift )
-  candidate.chomp!
-  if candidate.length < min_length
-    not_long_enough_words << candidate
-  else
-    unless candidate.include? required
-      required_letter_missing_words << candidate
+  while( candidate = dict.shift )
+    candidate.chomp!
+    if candidate.length < min_length
+      not_long_enough_words << candidate
     else
-      if forbidden.any?{|let| candidate.include? let}
-        forbidden_letter_words << candidate
+      unless candidate.include? required
+        required_letter_missing_words << candidate
       else
-        spelling_bee << candidate
+        if forbidden.any?{|let| candidate.include? let}
+          forbidden_letter_words << candidate
+        else
+          spelling_bee << candidate
+        end
       end
     end
   end
 end
-
 # Stats
-puts "Using the master word list:  #{word_list} "
-puts "Words with < #{min_length} characters #{not_long_enough_words.length}"
-puts "Words without an '#{required}' #{required_letter_missing_words.length}"
-puts "Words with forbidden letters '#{forbidden.join}' #{forbidden_letter_words.length}"
-puts "Spelling Bee has #{spelling_bee.length} words"
+puts "Words with < #{min_length} characters #{not_long_enough_words.uniq.length}"
+puts "Words without an '#{required}' #{required_letter_missing_words.uniq.length}"
+puts "Words with forbidden letters '#{forbidden.join}' #{forbidden_letter_words.uniq.length}"
+puts "Spelling Bee has #{spelling_bee.uniq.length} words"
 
 # Show words and score
 score = 0
-spelling_bee.each do |word|
+spelling_bee.uniq.sort.each do |word|
   if word.split(//).sort.uniq == (allowed_letters + [required]).sort
     puts " 15 #{word} ** Panagram **"
     score += 15
